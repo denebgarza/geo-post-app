@@ -10,7 +10,7 @@ const logger = pino({ level: 'info' });
 const expressLogger = expressPino({ logger });
 
 app.get('/', (req, res) => {
-  res.status(200).send('user-service');
+  res.status(200).send(config.app.name);
 });
 
 app.use(expressLogger);
