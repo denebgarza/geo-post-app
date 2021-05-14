@@ -6,6 +6,7 @@
     "start": "nodemon index.js | ./node_modules/.bin/pino-pretty"
   },
   "dependencies": {
+    "dotenv": "^9.0.2",
     "express": "^4.17.1",
     "express-pino-logger": "^6.0.0",
     "pino": "^6.11.3"

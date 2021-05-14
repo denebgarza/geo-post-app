@@ -2,8 +2,9 @@ import express from 'express';
 import pino from 'pino';
 import expressPino from 'express-pino-logger';
 
+import config from './config.js';
+
 const app = express();
-const port = 3000;
 
 const logger = pino({ level: 'info' });
 const expressLogger = expressPino({ logger });
@@ -14,6 +15,6 @@ app.get('/', (req, res) => {
 
 app.use(expressLogger);
 
-app.listen(port, () => {
-  logger.info(`Listening on port ${port}`);
+app.listen(config.app.port, () => {
+  logger.info(`${config.app.name} listening on port ${config.app.port}`);
 });
