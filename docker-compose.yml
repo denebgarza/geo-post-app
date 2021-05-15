@@ -9,3 +9,5 @@ services:
     volumes:
       - /app/node_modules
       - ./user-service:/usr/app
+  redis-server:
+    image: redis
