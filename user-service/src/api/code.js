@@ -1,6 +1,8 @@
+import jwt from 'jsonwebtoken';
 import * as codeDao from '../dao/code.js';
 import * as userDao from '../dao/user.js';
 import parentLogger from '../logger.js';
+import config from '../config.js';
 
 const logger = parentLogger.child({ module: 'code-dao' });
 
@@ -34,13 +36,14 @@ const verify = async (codeId, code) => {
 
   if (code === generatedCode.code) {
     await codeDao.remove(codeId);
-    const existingUser = await userDao.getByContact(generatedCode.channel, generatedCode.target);
-    if (!existingUser) {
-      await userDao.insert(generatedCode.channel, generatedCode.target);
+    // Check if user already exists with this contact information.
+    let targetUser = await userDao.getByContact(generatedCode.channel, generatedCode.target);
+    if (!targetUser) {
+      targetUser = await userDao.insert(generatedCode.channel, generatedCode.target);
     }
-
-    logger.info(`Verified code for channel=${generatedCode.channel} target=${generatedCode.target}`);
+    logger.info(`Verified code for userUuid=${targetUser.userUuid}`);
     return {
+      jwt: jwt.sign({ ...targetUser }, config.app.jwt_secret),
       result: results.SUCCESS,
     };
   }

@@ -4,6 +4,7 @@ const config = {
   app: {
     name: `user-service-${env}`,
     port: process.env.EXPRESS_PORT || 3000,
+    jwt_secret: process.env.JWT_SECRET,
   },
   redis: {
     host: 'redis-server',

@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 import { v4 as uuidv4 } from 'uuid';
 import parentLogger from '../logger.js';
 import { getCollection } from './mongodb.js';
@@ -17,21 +18,33 @@ const insert = async (channel, target) => {
   };
   user[channel] = target;
 
-  await collection.insertOne(user);
+  const result = await collection.insertOne(user);
+  if (result.result.ok !== 1) throw Error('Could not insert new user');
+  const newUser = result.ops[0];
+  newUser.userUuid = newUser._id;
+  return newUser;
 };
 
 const getByUuid = async (userUuid) => {
   const collection = getCollection(USERS_COLLECTION);
-  collection.findOne({
+  const user = await collection.findOne({
     _id: userUuid,
   });
+  if (user !== null) {
+    user.userUuid = user._id;
+  }
+  return user;
 };
 
 const getByContact = async (channel, target) => {
   const collection = getCollection(USERS_COLLECTION);
-  return collection.findOne({
+  const user = await collection.findOne({
     [channel]: target,
   });
+  if (user !== null) {
+    user.userUuid = user._id;
+  }
+  return user;
 };
 
 export { insert, getByUuid, getByContact };
