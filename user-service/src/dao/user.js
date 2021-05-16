@@ -11,7 +11,7 @@ const insert = async (channel, target) => {
   const uuid = uuidv4();
   logger.debug(`Inserting user userUuid=${uuid} channel=${channel} target=${target}`);
   const user = {
-    uuid,
+    _id: uuid,
     create_date: new Date(Date.now()),
     last_login: new Date(Date.now()),
   };
@@ -23,7 +23,7 @@ const insert = async (channel, target) => {
 const getByUuid = async (userUuid) => {
   const collection = getCollection(USERS_COLLECTION);
   collection.findOne({
-    uuid: userUuid,
+    _id: userUuid,
   });
 };
 
