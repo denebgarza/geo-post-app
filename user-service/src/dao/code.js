@@ -1,16 +1,11 @@
 import { v4 as uuidv4 } from 'uuid';
-import { promisify } from 'util';
-import redis from 'redis';
+import redis from 'async-redis';
 import parentLogger from '../logger.js';
 import config from '../config.js';
 
 const redisClient = redis.createClient({
   ...config.redis,
 });
-redisClient.get = promisify(redisClient.get);
-redisClient.exists = promisify(redisClient.exists);
-redisClient.hgetall = promisify(redisClient.hgetall);
-redisClient.hincrby = promisify(redisClient.hincrby);
 
 const logger = parentLogger.child({ module: 'code-dao' });
 
@@ -49,9 +44,9 @@ const get = async (codeId) => {
   return retVal;
 };
 
-const remove = (codeId) => {
+const remove = async (codeId) => {
   const key = `${CODE_PREFIX}:${codeId}`;
-  redisClient.del(key);
+  await redisClient.del(key);
 };
 
 export { insert, get, remove };

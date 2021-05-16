@@ -9,5 +9,24 @@ services:
     volumes:
       - /app/node_modules
       - ./user-service:/usr/app
+    environment:
+      - NODE_ENV=development
+      - EXPRESS_PORT=3000
   redis-server:
     image: redis
+  mongodb-server:
+    image: mongo:latest
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: mongopass
+    volumes:
+      - ./user-service/mongodb_data:/data/db
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: mongopass
+      ME_CONFIG_MONGODB_SERVER: mongodb-server

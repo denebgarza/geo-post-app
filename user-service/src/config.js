@@ -1,7 +1,3 @@
-import dotenv from 'dotenv';
-
-dotenv.config();
-
 const env = process.env.NODE_ENV || 'development';
 
 const config = {
@@ -13,7 +9,14 @@ const config = {
     host: 'redis-server',
     port: 6379,
   },
+  mongodb: {
+    host: 'mongodb-server',
+    port: 27017,
+    database: 'user-service',
+    username: 'root',
+    password: 'mongopass',
+  },
+  env,
 };
-config.env = env;
 
 export default config;

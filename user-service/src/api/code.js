@@ -1,4 +1,5 @@
-import { insert, get, remove } from '../dao/code.js';
+import * as codeDao from '../dao/code.js';
+import * as userDao from '../dao/user.js';
 import parentLogger from '../logger.js';
 
 const logger = parentLogger.child({ module: 'code-dao' });
@@ -25,28 +26,32 @@ const generate = (channel, target) => {
     default:
       logger.error(`Unknown channel ${channel}`);
   }
-  insert(code, channel, target);
+  codeDao.insert(code, channel, target);
 };
 
 const verify = async (codeId, code) => {
-  const generatedCode = await get(codeId);
+  const generatedCode = await codeDao.get(codeId);
 
   if (code === generatedCode.code) {
-    remove(codeId);
+    await codeDao.remove(codeId);
+    const existingUser = await userDao.getByContact(generatedCode.channel, generatedCode.target);
+    if (!existingUser) {
+      await userDao.insert(generatedCode.channel, generatedCode.target);
+    }
+
+    logger.info(`Verified code for channel=${generatedCode.channel} target=${generatedCode.target}`);
     return {
       result: results.SUCCESS,
     };
   }
 
   if (generatedCode.attempts > MAX_ATTEMPTS) {
-    remove(codeId);
+    await codeDao.remove(codeId);
     return {
       result: results.TOO_MANY_ATTEMPTS,
     };
   }
 
-  logger.debug(`Verifying input code=${code} against store code=${generatedCode.code}`);
-  
   return {
     result: results.WRONG_CODE,
   };
