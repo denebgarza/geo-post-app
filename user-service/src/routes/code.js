@@ -6,13 +6,13 @@ const logger = parentLogger.child({ module: 'code-route' });
 const router = express.Router();
 
 router.post('/generate', (req, res) => {
-  generate(channels.EMAIL, req.body.target);
-  res.sendStatus(204);
+  const retVal = generate(channels.EMAIL, req.body.target);
+  res.status(200).send(retVal);
 });
 
 router.post('/verify', async (req, res) => {
   try {
-    const result = await verify(req.body.id, req.body.code);
+    const result = await verify(req.body.code_id, parseInt(req.body.code, 10));
     res.status(200).send(result);
   } catch (err) {
     logger.error(err);

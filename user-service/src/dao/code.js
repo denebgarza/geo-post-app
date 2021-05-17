@@ -26,6 +26,7 @@ const insert = (code, channel, target) => {
     BODY_FIELD, JSON.stringify(value),
     ATTEMPTS_FIELD, 0,
   ]);
+  return codeId;
 };
 
 const get = async (codeId) => {

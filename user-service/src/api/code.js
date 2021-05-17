@@ -28,7 +28,10 @@ const generate = (channel, target) => {
     default:
       logger.error(`Unknown channel ${channel}`);
   }
-  codeDao.insert(code, channel, target);
+  const existingUser = userDao.getByContact(channel, target);
+  const type = (existingUser === null) ? 'new' : 'return';
+  const codeId = codeDao.insert(code, channel, target);
+  return { type, codeId };
 };
 
 const verify = async (codeId, code) => {
@@ -49,6 +52,7 @@ const verify = async (codeId, code) => {
   }
 
   if (generatedCode.attempts > MAX_ATTEMPTS) {
+    logger.info(`Too many attempts for codeId=${codeId}`);
     await codeDao.remove(codeId);
     return {
       result: results.TOO_MANY_ATTEMPTS,
