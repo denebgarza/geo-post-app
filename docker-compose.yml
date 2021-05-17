@@ -7,8 +7,21 @@ services:
     ports:
       - 3000:3000
     volumes:
-      - /app/node_modules
+      - /usr/app/node_modules
       - ./user-service:/usr/app
+    environment:
+      - NODE_ENV=development
+      - EXPRESS_PORT=3000
+      - JWT_SECRET=trustnoone
+  post-service:
+    build:
+      context: ./post-service
+      dockerfile: Dockerfile.dev
+    ports:
+      - 3001:3000
+    volumes:
+      - /usr/app/node_modules
+      - ./post-service:/usr/app
     environment:
       - NODE_ENV=development
       - EXPRESS_PORT=3000
@@ -21,7 +34,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: mongopass
     volumes:
-      - ./user-service/mongodb_data:/data/db
+      - ./mongodb_data:/data/db
   mongo-express:
     image: mongo-express
     restart: always
