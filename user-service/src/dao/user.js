@@ -21,30 +21,39 @@ const insert = async (channel, target) => {
   const result = await collection.insertOne(user);
   if (result.result.ok !== 1) throw Error('Could not insert new user');
   const newUser = result.ops[0];
-  newUser.userUuid = newUser._id;
+  newUser.id = newUser._id;
+  delete newUser._id;
   return newUser;
 };
 
-const getByUuid = async (userId) => {
+const getById = async (userId) => {
   const collection = getCollection(USERS_COLLECTION);
-  const user = await collection.findOne({
-    _id: userId,
-  });
-  if (user !== null) {
-    user.userUuid = user._id;
-  }
+  const user = await collection.findOneAndUpdate(
+    { _id: userId },
+    [
+      { $set: { id: '$_id' } },
+      { $unset: '_id' },
+    ],
+    {
+      returnNewDocument: true,
+    },
+  );
   return user;
 };
 
 const getByContact = async (channel, target) => {
   const collection = getCollection(USERS_COLLECTION);
-  const user = await collection.findOne({
-    [channel]: target,
-  });
-  if (user !== null) {
-    user.userUuid = user._id;
-  }
+  const user = await collection.findOneAndUpdate(
+    { [channel]: target },
+    [
+      { $set: { id: '$_id' } },
+      { $unset: '_id' },
+    ],
+    {
+      returnNewDocument: true,
+    },
+  );
   return user;
 };
 
-export { insert, getByUuid, getByContact };
+export { insert, getById, getByContact };

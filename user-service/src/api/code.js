@@ -44,7 +44,7 @@ const verify = async (codeId, code) => {
     if (!targetUser) {
       targetUser = await userDao.insert(generatedCode.channel, generatedCode.target);
     }
-    logger.info(`Verified code for userUuid=${targetUser.userUuid}`);
+    logger.info(`Verified code for userId=${targetUser.id}`);
     return {
       jwt: jwt.sign({ ...targetUser }, config.app.jwt_secret),
       result: results.SUCCESS,

@@ -47,7 +47,6 @@ const findById = async (postId) => {
 };
 
 const findAllByLocation = async (lng, lat, radius) => {
-  logger.info(`Finding all posts by at [${lng}, ${lat}] with radiusMeters=${radius}`);
   const EARTH_RADIUS_METERS = 6378100;
   const collection = getCollection(POSTS_COLLECTION);
   const posts = await collection.aggregate([
@@ -63,6 +62,7 @@ const findAllByLocation = async (lng, lat, radius) => {
     { $set: { id: '$_id' } },
     { $unset: '_id' },
   ]);
+  logger.info(`Found ${posts.length} posts near [${lng}, ${lat}] with radiusMeters=${radius}`);
   return await posts.toArray();
 };
 
