@@ -13,12 +13,15 @@ services:
       - NODE_ENV=development
       - EXPRESS_PORT=3000
       - JWT_SECRET=trustnoone
+    depends_on:
+      - mongodb-server
   post-service:
     build:
       context: ./post-service
       dockerfile: Dockerfile.dev
     ports:
       - 3001:3000
+      - 9229:9229
     volumes:
       - /usr/app/node_modules
       - ./post-service:/usr/app
@@ -26,6 +29,9 @@ services:
       - NODE_ENV=development
       - EXPRESS_PORT=3000
       - JWT_SECRET=trustnoone
+    depends_on:
+      - mongodb-server
+    command: ["npm", "run", "debug"]
   redis-server:
     image: redis
   mongodb-server:

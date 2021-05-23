@@ -8,7 +8,7 @@ import codeRoute from './routes/code.js';
 
 const app = express();
 
-const expressLogger = expressPino({logger});
+const expressLogger = expressPino({ logger });
 const init = async () => {
   await mongodb.setup();
 

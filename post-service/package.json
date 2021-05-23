@@ -3,7 +3,8 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon src/index.js | ./node_modules/.bin/pino-pretty"
+    "start": "nodemon src/index.js | ./node_modules/.bin/pino-pretty",
+    "debug": "nodemon --inspect=0.0.0.0:9229 src/index.js | ./node_modules/.bin/pino-pretty"
   },
   "dependencies": {
     "express": "^4.17.1",

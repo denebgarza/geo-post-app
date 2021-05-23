@@ -10,7 +10,7 @@ const logger = parentLogger.child({ module: 'user-dao' });
 const insert = async (channel, target) => {
   const collection = getCollection(USERS_COLLECTION);
   const uuid = uuidv4();
-  logger.debug(`Inserting user userUuid=${uuid} channel=${channel} target=${target}`);
+  logger.info(`Inserting user userUuid=${uuid} channel=${channel} target=${target}`);
   const user = {
     _id: uuid,
     create_date: new Date(Date.now()),
@@ -25,10 +25,10 @@ const insert = async (channel, target) => {
   return newUser;
 };
 
-const getByUuid = async (userUuid) => {
+const getByUuid = async (userId) => {
   const collection = getCollection(USERS_COLLECTION);
   const user = await collection.findOne({
-    _id: userUuid,
+    _id: userId,
   });
   if (user !== null) {
     user.userUuid = user._id;
