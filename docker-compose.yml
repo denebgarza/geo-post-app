@@ -16,6 +16,7 @@ services:
       - JWT_SECRET=trustnoone
     depends_on:
       - mongodb-server
+    command: ["npm", "run", "debug"]
   post-service:
     build:
       context: ./post-service

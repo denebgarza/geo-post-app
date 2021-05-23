@@ -18,7 +18,7 @@ const results = Object.freeze({
 
 const MAX_ATTEMPTS = 3;
 
-const generate = (channel, target) => {
+const generate = async (channel, target) => {
   const code = Math.floor(Math.random() * (99999 - 10000 + 1) + 10000);
   switch (channel) {
     case channels.EMAIL:
@@ -28,7 +28,7 @@ const generate = (channel, target) => {
     default:
       logger.error(`Unknown channel ${channel}`);
   }
-  const existingUser = userDao.getByContact(channel, target);
+  const existingUser = await userDao.getByContact(channel, target);
   const type = (existingUser === null) ? 'new' : 'return';
   const codeId = codeDao.insert(code, channel, target);
   return { type, codeId };

@@ -5,8 +5,8 @@ import { generate, verify, channels } from '../api/code.js';
 const logger = parentLogger.child({ module: 'code-route' });
 const router = express.Router();
 
-router.post('/generate', (req, res) => {
-  const retVal = generate(channels.EMAIL, req.body.target);
+router.post('/generate', async (req, res) => {
+  const retVal = await generate(channels.EMAIL, req.body.target);
   res.status(200).send(retVal);
 });
 
