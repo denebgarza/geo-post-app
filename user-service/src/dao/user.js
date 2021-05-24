@@ -4,6 +4,8 @@ import parentLogger from '../logger.js';
 import uuidIdToString from './util.js';
 import { getCollection } from './mongodb.js';
 
+MUUID.mode('relaxed');
+
 const USERS_COLLECTION = 'users';
 
 const logger = parentLogger.child({ module: 'user-dao' });

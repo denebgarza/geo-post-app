@@ -7,7 +7,7 @@ const logger = parentLogger.child({ module: 'mongodb' });
 let db;
 
 const collections = {
-  POSTS: 'posts'
+  POSTS: 'posts',
 };
 
 const getCollection = (collection) => db.collection(collection);
