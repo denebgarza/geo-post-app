@@ -1,13 +1,11 @@
 import mongodb from 'mongodb';
 import config from '../config.js';
-import parentLogger from '../logger.js';
-
-const logger = parentLogger.child({ module: 'mongodb' });
 
 let db;
 
 const collections = {
   POSTS: 'posts',
+  POST_VIEWS: 'post-views',
 };
 
 const getCollection = (collection) => db.collection(collection);
@@ -20,8 +18,8 @@ const setup = async () => {
   await mongoClient.connect();
   db = mongoClient.db(config.mongodb.database);
 
-  const result = await getCollection(collections.POSTS).createIndex({ geo_location: '2dsphere' });
-  logger.info(`Index created ${result}`);
+  await getCollection(collections.POSTS).createIndex({ geo_location: '2dsphere' });
+  await getCollection(collections.POSTS).createIndex({ update_date: -1 });
 };
 
 export { setup, getCollection, collections };

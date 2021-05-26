@@ -1,11 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
-import redis from 'async-redis';
+import redisClient from './redis.js';
 import parentLogger from '../logger.js';
-import config from '../config.js';
-
-const redisClient = redis.createClient({
-  ...config.redis,
-});
 
 const logger = parentLogger.child({ module: 'code-dao' });
 

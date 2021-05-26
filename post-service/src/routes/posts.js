@@ -17,7 +17,7 @@ router.get('/:lnglat/:radiusMeters', async (req, res) => {
 
 router.get('/:postId', async (req, res) => {
   const { postId } = req.params;
-  const post = await postsApi.findById(postId);
+  const post = await postsApi.view(postId, req.user.id);
   res.send(post);
 });
 

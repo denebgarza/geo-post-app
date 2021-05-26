@@ -29,6 +29,7 @@ const insert = async (userId, body, lng, lat) => {
   if (result.result.ok !== 1) throw Error('Could not insert new post');
   const newPost = result.ops[0];
   uuidIdToString(newPost);
+
   return newPost;
 };
 
@@ -36,6 +37,7 @@ const findById = async (postId) => {
   logger.info(`Finding post by postId=${postId}`);
   const collection = getCollection(POSTS_COLLECTION);
   const post = await collection.findOne({ _id: MUUID.from(postId) });
+  uuidIdToString(post);
   return post;
 };
 
@@ -50,9 +52,9 @@ const findAllByLocation = async (lng, lat, radius) => {
         },
       },
     },
-  );
+  ).sort({ update_date: -1 });
   const postsArray = await posts.toArray();
-  postsArray.forEach((post) => uuidIdToString(post));
+  postsArray.forEach((post, idx, arr) => uuidIdToString(arr[idx]));
   logger.info(`Found ${postsArray.length} posts near [${lng}, ${lat}] with radiusMeters=${radius}`);
   return postsArray;
 };

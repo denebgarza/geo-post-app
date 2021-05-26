@@ -6,6 +6,10 @@ const config = {
     port: process.env.EXPRESS_PORT || 3000,
     jwt_secret: process.env.JWT_SECRET,
   },
+  redis: {
+    host: 'redis-server',
+    port: 6379,
+  },
   mongodb: {
     host: 'mongodb-server',
     port: 27017,
