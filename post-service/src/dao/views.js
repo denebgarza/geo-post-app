@@ -23,11 +23,12 @@ const insert = async (postId, hll) => {
 const get = async (postId) => {
   logger.info(`Getting post views for postId=${postId}`);
   const viewsCollection = getCollection(collections.POST_VIEWS);
-  const viewsHll = await viewsCollection.findOne({
+  const postViews = await viewsCollection.findOne({
     _id: MUUID.from(postId),
   });
-  uuidIdToString(viewsHll);
-  return viewsHll;
+  if (postViews === null) return null;
+  uuidIdToString(postViews);
+  return postViews.hll;
 };
 
 export { insert, get };

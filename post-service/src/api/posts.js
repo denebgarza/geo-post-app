@@ -1,3 +1,4 @@
+import NodeCache from 'node-cache';
 import * as postsDao from '../dao/posts.js';
 import * as viewsDao from '../dao/views.js';
 import parentLogger from '../logger.js';
@@ -8,12 +9,21 @@ const logger = parentLogger.child({ module: 'views-dao' });
 const MAX_RADIUS_METERS = 5000;
 const POST_PREVIEW_LENGTH = 200;
 const POST_VIEWS_KEY_PREFIX = 'post_views';
+
 const PERSIST_VIEWS_WINDOW_SECONDS = 30;
 
-let viewsLastPersistedOn = Date.now();
+const viewsCache = new NodeCache({ stdTTL: PERSIST_VIEWS_WINDOW_SECONDS, checkperiod: 60 });
 
 async function getViewCount(postId) {
   const key = `${POST_VIEWS_KEY_PREFIX}:${postId}`;
+  if (!(await redisClient.exists(key))) {
+    const viewsHll = await viewsDao.get(postId);
+    if (viewsHll === null) {
+      logger.error(`No views found in cache or datastore for postId=${postId}`);
+      return 0;
+    }
+    await redisClient.set(key, viewsHll);
+  }
   return redisClient.pfcount(key);
 }
 
@@ -26,9 +36,11 @@ async function incrementViewCount(postId, userId) {
   const uniqueView = `${userId}:${isoDate.substr(0, truncateIdx)}`;
   await redisClient.pfadd(key, uniqueView);
 
-  if (Math.floor((Date.now() - viewsLastPersistedOn) / 1000) > PERSIST_VIEWS_WINDOW_SECONDS) {
+  const viewsLastPersistedOn = viewsCache.get(postId);
+  if (!viewsLastPersistedOn
+    || (Math.floor((Date.now() - viewsLastPersistedOn) / 1000) > PERSIST_VIEWS_WINDOW_SECONDS)) {
     viewsDao.insert(postId, await redisClient.get(key));
-    viewsLastPersistedOn = Date.now();
+    viewsCache.set(postId, Date.now());
   }
 }
 
@@ -46,16 +58,15 @@ const view = async (postId, userId) => {
     const key = `${POST_VIEWS_KEY_PREFIX}:${postId}`;
     const viewCount = await redisClient.pfcount(key);
     post.views = viewCount;
-    const viewsCached = await redisClient.exists(key);
-    incrementViewCount(postId, userId);
+    const isViewCountCached = await redisClient.exists(key);
+    await incrementViewCount(postId, userId);
 
-    if (!viewsCached) {
+    if (!isViewCountCached) {
       logger.warn(`Post views not found in cache for postId=${postId}. Restoring from datastore.`);
       const postViewsHll = await viewsDao.get(postId);
       if (postViewsHll === null) {
         logger.warn(`Post views not found in datastore for postId=${postId}. Creating a new HLL.`);
-        await incrementViewCount(postId, userId);
-        const viewsHll = await redisClient.get(key);
+        const viewsHll = await redisClient.get(key); // Should already exist due to above increment.
         viewsDao.insert(postId, viewsHll);
       } else {
         redisClient.set(key, postViewsHll);
