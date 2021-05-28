@@ -28,7 +28,7 @@ const get = async (postId) => {
   });
   if (postViews === null) return null;
   uuidIdToString(postViews);
-  return postViews.hll;
+  return postViews.hll.buffer;
 };
 
 export { insert, get };
