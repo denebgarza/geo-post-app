@@ -18,6 +18,7 @@ async function getViewCount(postId) {
   try {
     const key = `${POST_VIEWS_KEY_PREFIX}:${postId}`;
     if (!(await redisClient.exists(key))) {
+      logger.info(`No views found in cache for postId=${postId}, attempting to restore from datastore.`);
       const viewsHll = await viewsDao.get(postId);
       if (viewsHll === null) {
         logger.error(`No views found in cache or datastore for postId=${postId}`);
