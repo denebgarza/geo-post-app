@@ -15,16 +15,21 @@ const PERSIST_VIEWS_WINDOW_SECONDS = 30;
 const viewsCache = new NodeCache({ stdTTL: PERSIST_VIEWS_WINDOW_SECONDS, checkperiod: 60 });
 
 async function getViewCount(postId) {
-  const key = `${POST_VIEWS_KEY_PREFIX}:${postId}`;
-  if (!(await redisClient.exists(key))) {
-    const viewsHll = await viewsDao.get(postId);
-    if (viewsHll === null) {
-      logger.error(`No views found in cache or datastore for postId=${postId}`);
-      return 0;
+  try {
+    const key = `${POST_VIEWS_KEY_PREFIX}:${postId}`;
+    if (!(await redisClient.exists(key))) {
+      const viewsHll = await viewsDao.get(postId);
+      if (viewsHll === null) {
+        logger.error(`No views found in cache or datastore for postId=${postId}`);
+        return 0;
+      }
+      await redisClient.set(key, viewsHll);
     }
-    await redisClient.set(key, viewsHll);
+    return await redisClient.pfcount(key);
+  } catch (err) {
+    logger.error(err.message);
+    return 0;
   }
-  return redisClient.pfcount(key);
 }
 
 async function incrementViewCount(postId, userId) {
@@ -59,18 +64,20 @@ const view = async (postId, userId) => {
     const viewCount = await redisClient.pfcount(key);
     post.views = viewCount;
     const isViewCountCached = await redisClient.exists(key);
-    await incrementViewCount(postId, userId);
 
     if (!isViewCountCached) {
       logger.warn(`Post views not found in cache for postId=${postId}. Restoring from datastore.`);
       const postViewsHll = await viewsDao.get(postId);
       if (postViewsHll === null) {
         logger.warn(`Post views not found in datastore for postId=${postId}. Creating a new HLL.`);
-        const viewsHll = await redisClient.get(key); // Should already exist due to above increment.
+        await incrementViewCount(postId, userId);
+        const viewsHll = await redisClient.get(key);
         viewsDao.insert(postId, viewsHll);
       } else {
         redisClient.set(key, postViewsHll);
       }
+    } else {
+      incrementViewCount(postId, userId);
     }
   }
   return post;
