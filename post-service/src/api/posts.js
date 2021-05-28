@@ -71,8 +71,6 @@ const view = async (postId, userId) => {
       if (postViewsHll === null) {
         logger.warn(`Post views not found in datastore for postId=${postId}. Creating a new HLL.`);
         await incrementViewCount(postId, userId);
-        const viewsHll = await redisClient.get(key);
-        viewsDao.insert(postId, viewsHll);
       } else {
         redisClient.set(key, postViewsHll);
       }
