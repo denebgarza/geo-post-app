@@ -1,4 +1,3 @@
-import NodeCache from 'node-cache';
 import * as postsDao from '../dao/posts.js';
 import * as viewsDao from '../dao/views.js';
 import parentLogger from '../logger.js';
@@ -11,8 +10,6 @@ const POST_PREVIEW_LENGTH = 200;
 const POST_VIEWS_KEY_PREFIX = 'post_views';
 
 const PERSIST_VIEWS_WINDOW_SECONDS = 30;
-
-const viewsCache = new NodeCache({ stdTTL: PERSIST_VIEWS_WINDOW_SECONDS, checkperiod: 60 });
 
 async function getViewCount(postId) {
   try {
@@ -42,11 +39,11 @@ async function incrementViewCount(postId, userId) {
   const uniqueView = `${userId}:${isoDate.substr(0, truncateIdx)}`;
   await redisClient.pfadd(key, uniqueView);
 
-  const viewsLastPersistedOn = viewsCache.get(postId);
-  if (!viewsLastPersistedOn
-    || (Math.floor((Date.now() - viewsLastPersistedOn) / 1000) > PERSIST_VIEWS_WINDOW_SECONDS)) {
+  const viewCacheKey = `view_cache:${postId}`;
+  if (!(await redisClient.exists(viewCacheKey))) {
     viewsDao.insert(postId, await redisClient.get(key));
-    viewsCache.set(postId, Date.now());
+    redisClient.set(viewCacheKey, 1);
+    redisClient.expire(viewCacheKey, PERSIST_VIEWS_WINDOW_SECONDS);
   }
 }
 
