@@ -53,10 +53,8 @@ const insert = async (userId, body, lng, lat) => {
   return newPost;
 };
 
-const findById = async (postId) => postsDao.findById(postId);
-
 const view = async (postId, userId) => {
-  const post = await findById(postId);
+  const post = await postsDao.findById(postId);
   if (post) {
     const key = `${POST_VIEWS_KEY_PREFIX}:${postId}`;
     const viewCount = await redisClient.pfcount(key);
@@ -97,5 +95,5 @@ const findAllByLocation = async (lng, lat, radiusMeters) => {
 };
 
 export {
-  insert, findById, view, findAllByLocation,
+  insert, view, findAllByLocation,
 };

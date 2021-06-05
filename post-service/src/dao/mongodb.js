@@ -6,6 +6,8 @@ let db;
 const collections = {
   POSTS: 'posts',
   POST_VIEWS: 'post-views',
+  COMMENTS: 'comments',
+  ENGLISH_WORDS: 'english-words',
 };
 
 const getCollection = (collection) => db.collection(collection);
@@ -20,6 +22,9 @@ const setup = async () => {
 
   await getCollection(collections.POSTS).createIndex({ geo_location: '2dsphere' });
   await getCollection(collections.POSTS).createIndex({ update_date: -1 });
+  await getCollection(collections.COMMENTS).createIndex({ update_date: 1 });
+  await getCollection(collections.COMMENTS).createIndex({ post_id: 1, display_name: 1 });
+  await getCollection(collections.COMMENTS).createIndex({ post_id: 1, user_id: 1 });
 };
 
 export { setup, getCollection, collections };

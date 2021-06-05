@@ -10,13 +10,14 @@ const POSTS_COLLECTION = collections.POSTS;
 const logger = parentLogger.child({ module: 'posts-dao' });
 
 const insert = async (userId, body, lng, lat) => {
-  const collection = getCollection(POSTS_COLLECTION);
   const uuid = MUUID.v4();
   logger.info(`Inserting post postUuid=${uuid} `);
+  const collection = getCollection(POSTS_COLLECTION);
   const post = {
     _id: uuid,
     user_id: userId,
     body,
+    comments: 0,
     geo_location: {
       type: 'Point',
       coordinates: [lng, lat],
@@ -31,6 +32,15 @@ const insert = async (userId, body, lng, lat) => {
   uuidIdToString(newPost);
 
   return newPost;
+};
+
+const incrCommentCount = async (postId) => {
+  logger.info(`Incrementing comment count for postId=${postId}`);
+  const collection = getCollection(POSTS_COLLECTION);
+  await collection.update(
+    { _id: MUUID.from(postId) },
+    { $inc: { comments: 1 } },
+  );
 };
 
 const findById = async (postId) => {
@@ -52,6 +62,7 @@ const findAllByLocation = async (lng, lat, radius) => {
         },
       },
     },
+    { user_id: 0 },
   ).sort({ update_date: -1 });
   const postsArray = await posts.toArray();
   postsArray.forEach((post, idx, arr) => uuidIdToString(arr[idx]));
@@ -59,4 +70,6 @@ const findAllByLocation = async (lng, lat, radius) => {
   return postsArray;
 };
 
-export { insert, findById, findAllByLocation };
+export {
+  insert, findById, findAllByLocation, incrCommentCount,
+};
