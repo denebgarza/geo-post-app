@@ -11,6 +11,7 @@
         "sourceType": "module"
     },
     "rules": {
-      "import/extensions": ["error", "never", {"js": "always"}]
+      "import/extensions": ["error", "never", {"js": "always"}],
+      "import/no-extraneous-dependencies": "off"
     }
 }

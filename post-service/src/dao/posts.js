@@ -1,11 +1,12 @@
 import MUUID from 'uuid-mongodb';
+import commons from 'commons';
 import parentLogger from '../logger.js';
-import uuidIdToString from './util.js';
 import { getCollection, collections } from './mongodb.js';
 
 MUUID.mode('relaxed');
 
 const POSTS_COLLECTION = collections.POSTS;
+const { transformId } = commons.mongodb;
 
 const logger = parentLogger.child({ module: 'posts-dao' });
 
@@ -29,7 +30,7 @@ const insert = async (userId, body, lng, lat) => {
   const result = await collection.insertOne(post);
   if (result.result.ok !== 1) throw Error('Could not insert new post');
   const newPost = result.ops[0];
-  uuidIdToString(newPost);
+  transformId(newPost);
 
   return newPost;
 };
@@ -47,7 +48,7 @@ const findById = async (postId) => {
   logger.info(`Finding post by postId=${postId}`);
   const collection = getCollection(POSTS_COLLECTION);
   const post = await collection.findOne({ _id: MUUID.from(postId) });
-  uuidIdToString(post);
+  transformId(post);
   return post;
 };
 
@@ -65,7 +66,7 @@ const findAllByLocation = async (lng, lat, radius) => {
     { user_id: 0 },
   ).sort({ update_date: -1 });
   const postsArray = await posts.toArray();
-  postsArray.forEach((post, idx, arr) => uuidIdToString(arr[idx]));
+  postsArray.forEach((post, idx, arr) => transformId(arr[idx]));
   logger.info(`Found ${postsArray.length} posts near [${lng}, ${lat}] with radiusMeters=${radius}`);
   return postsArray;
 };

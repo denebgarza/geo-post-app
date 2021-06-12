@@ -12,6 +12,7 @@
     },
     "rules": {
       "import/extensions": ["error", "never", {"js": "always"}],
+      "import/no-extraneous-dependencies": "off",
       "no-param-reassign": [2, {"props": false}]
     }
 }

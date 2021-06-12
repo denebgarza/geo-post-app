@@ -1,9 +1,11 @@
 import MUUID from 'uuid-mongodb';
+import commons from 'commons';
 import parentLogger from '../logger.js';
-import uuidIdToString from './util.js';
 import { getCollection, collections } from './mongodb.js';
 
 const logger = parentLogger.child({ module: 'views-dao' });
+
+const { transformId } = commons.mongodb;
 
 const insert = async (postId, hll) => {
   logger.info(`Inserting post views for postId=${postId}`);
@@ -27,7 +29,7 @@ const get = async (postId) => {
     _id: MUUID.from(postId),
   });
   if (postViews === null) return null;
-  uuidIdToString(postViews);
+  transformId(postViews);
   return postViews.hll.buffer;
 };
 

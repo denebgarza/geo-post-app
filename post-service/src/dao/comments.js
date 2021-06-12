@@ -1,9 +1,11 @@
 import MUUID from 'uuid-mongodb';
+import commons from 'commons';
 import parentLogger from '../logger.js';
-import uuidIdToString from './util.js';
 import { getCollection, collections } from './mongodb.js';
 
 const logger = parentLogger.child({ module: 'comments-dao' });
+
+const { transformId } = commons.mongodb;
 
 const generateDisplayName = async () => {
   const wordsCollection = getCollection(collections.ENGLISH_WORDS);
@@ -33,7 +35,7 @@ const findByPostId = async (postId) => {
     { user_id: 0 },
   ).sort({ update_date: 1 });
   const commentsArray = await comments.toArray();
-  commentsArray.forEach((comment, idx, arr) => uuidIdToString(arr[idx]));
+  commentsArray.forEach((comment, idx, arr) => transformId(arr[idx]));
   return commentsArray;
 };
 
@@ -53,7 +55,7 @@ const insert = async (postId, userId, body, displayName) => {
   const result = await collection.insertOne(comment);
   if (result.result.ok !== 1) throw Error('Could not insert new comment');
   const newComment = result.ops[0];
-  uuidIdToString(newComment);
+  transformId(newComment);
 
   return newComment;
 };
