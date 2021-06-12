@@ -1,17 +1,24 @@
-import mongodb from 'mongodb';
+/* eslint-disable import/no-extraneous-dependencies */
+import commons from 'commons';
 import config from '../config.js';
 
 let db;
 
-const setup = async () => {
-  const { MongoClient } = mongodb;
-  const mongoClient = new MongoClient(
-    `mongodb://${config.mongodb.username}:${config.mongodb.password}@${config.mongodb.host}:${config.mongodb.port}`,
-  );
-  await mongoClient.connect();
-  db = mongoClient.db(config.mongodb.database);
+const collections = {
+  USERS: 'users',
+  NOTIFICATIONS: 'notifications',
 };
-
+const { initMongoDb } = commons.mongodb;
 const getCollection = (collection) => db.collection(collection);
 
-export { setup, getCollection };
+const setup = async () => {
+  db = await initMongoDb(
+    config.mongodb.username,
+    config.mongodb.password,
+    config.mongodb.host,
+    config.mongodb.port,
+    config.mongodb.database,
+  );
+};
+
+export { setup, getCollection, collections };

@@ -2,9 +2,9 @@ FROM node:lts-alpine3.13
 
 WORKDIR /usr/app
 
-COPY ./package.json ./
+COPY ./user-service/package.json ./
 RUN npm install
 
-COPY . .
+COPY ./commons ./node_modules/commons/
 
 CMD ["npm", "start"]

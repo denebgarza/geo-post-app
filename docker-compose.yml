@@ -2,8 +2,8 @@ version: '3'
 services:
   user-service:
     build:
-      context: ./user-service
-      dockerfile: Dockerfile.dev
+      context: ./
+      dockerfile: ./user-service/Dockerfile.dev
     ports:
       - 3000:3000
       - 9228:9229
@@ -19,8 +19,8 @@ services:
     command: ["npm", "run", "debug"]
   post-service:
     build:
-      context: ./post-service
-      dockerfile: Dockerfile.dev
+      context: ./
+      dockerfile: ./post-service/Dockerfile.dev
     ports:
       - 3001:3000
       - 9229:9229
