@@ -31,6 +31,7 @@ services:
       - NODE_ENV=development
       - EXPRESS_PORT=3000
       - JWT_SECRET=trustnoone
+      - GOOGLE_APPLICATION_CREDENTIALS=/usr/app/serene-smoke-316705-dbe6d71303f7.json
     depends_on:
       - mongodb-server
     command: ["npm", "run", "debug"]

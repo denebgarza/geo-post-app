@@ -5,7 +5,6 @@ WORKDIR /usr/app
 COPY ./post-service/package.json ./
 RUN npm install
 
-#COPY ./post-service .
 COPY ./commons ./node_modules/commons/
 
 CMD ["npm", "start"]

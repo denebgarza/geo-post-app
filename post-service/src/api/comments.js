@@ -1,10 +1,11 @@
+import { PubSub } from '@google-cloud/pubsub';
 import * as commentsDao from '../dao/comments.js';
 import * as postsDao from '../dao/posts.js';
 import parentLogger from '../logger.js';
 
 const OP_DISPLAY_NAME = 'OP';
-
 const logger = parentLogger.child({ module: 'comments-api' });
+const pubSubClient = new PubSub();
 
 async function getDisplayName(postId, userId) {
   let displayName = OP_DISPLAY_NAME;
@@ -34,6 +35,20 @@ async function getDisplayName(postId, userId) {
   return displayName;
 }
 
+const publishNotificationMessage = async (userId, postId, commentBody) => {
+  const topicName = 'projects/serene-smoke-316705/topics/create-notification';
+  const data = {
+    userId, postId, commentBody, type: 'CREATE_NOTIFICATION',
+  };
+  const dataBuffer = Buffer.from(JSON.stringify(data));
+  try {
+    const messageId = await pubSubClient.topic(topicName).publish(dataBuffer);
+    logger.info(`Published messageId=${messageId} to topic=${topicName}`);
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
 // TODO: Check for distance cheating
 const insert = async (postId, parentCommentId, userId, body) => {
   if (parentCommentId) {
@@ -44,6 +59,9 @@ const insert = async (postId, parentCommentId, userId, body) => {
   const displayName = await getDisplayName(postId, userId);
   const newComment = await commentsDao.insert(postId, parentCommentId, userId, body, displayName);
   await postsDao.incrCommentCount(postId);
+
+  await publishNotificationMessage(userId, postId, body);
+
   return newComment;
 };
 
