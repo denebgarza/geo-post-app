@@ -26,6 +26,7 @@ const setup = async () => {
   await getCollection(collections.COMMENTS).createIndex({ update_date: 1 });
   await getCollection(collections.COMMENTS).createIndex({ post_id: 1, display_name: 1 });
   await getCollection(collections.COMMENTS).createIndex({ post_id: 1, user_id: 1 });
+  await getCollection(collections.COMMENTS).createIndex({ parent_comment_id: 1 });
 };
 
 export { setup, getCollection, collections };

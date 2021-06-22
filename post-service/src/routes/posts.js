@@ -9,8 +9,32 @@ const router = express.Router();
 
 router.post('/:postId/comments', async (req, res) => {
   try {
-    const newComment = await commentsApi.insert(req.params.postId, req.user.id, req.body.body);
+    const newComment = await commentsApi.insert(
+      req.params.postId, null, req.user.id, req.body.body,
+    );
     res.status(201).send(newComment);
+  } catch (err) {
+    logger.error(err);
+    res.sendStatus(500);
+  }
+});
+
+router.post('/:postId/comments/:parentCommentId', async (req, res) => {
+  try {
+    const newComment = await commentsApi.insert(
+      req.params.postId, req.params.parentCommentId, req.user.id, req.body.body,
+    );
+    res.status(201).send(newComment);
+  } catch (err) {
+    logger.error(err);
+    res.sendStatus(500);
+  }
+});
+
+router.get('/:postId/comments/:parentCommentId', async (req, res) => {
+  try {
+    const comments = await commentsApi.findReplies(req.params.parentCommentId);
+    res.status(200).send(comments);
   } catch (err) {
     logger.error(err);
     res.sendStatus(500);
@@ -23,7 +47,7 @@ router.get('/:postId/comments/:lng/:lat', async (req, res) => {
     res.status(200).send(comments);
   } catch (err) {
     logger.error(err);
-    return res.sendStatus(500);
+    res.sendStatus(500);
   }
 });
 

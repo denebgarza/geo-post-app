@@ -39,7 +39,18 @@ const findByPostId = async (postId) => {
   return commentsArray;
 };
 
-const insert = async (postId, userId, body, displayName) => {
+const findReplies = async (parentCommentId) => {
+  logger.info(`Finding comment replies for parentCommentIt=${parentCommentId}`);
+  const collection = getCollection(collections.COMMENTS);
+  const comments = await collection.find(
+    { parent_comment_id: parentCommentId },
+  ).sort({ update_date: 1 });
+  const commentsArray = await comments.toArray();
+  commentsArray.forEach((comment, idx, arr) => transformId(arr[idx]));
+  return commentsArray;
+};
+
+const insert = async (postId, parentCommentId, userId, body, displayName) => {
   const uuid = MUUID.v4();
   logger.info(`Inserting commentId=${uuid} for postId=${postId} userId=${userId}`);
   const collection = getCollection(collections.COMMENTS);
@@ -52,6 +63,9 @@ const insert = async (postId, userId, body, displayName) => {
     create_date: new Date(Date.now()),
     update_date: new Date(Date.now()),
   };
+  if (parentCommentId) {
+    comment.parent_comment_id = parentCommentId;
+  }
   const result = await collection.insertOne(comment);
   if (result.result.ok !== 1) throw Error('Could not insert new comment');
   const newComment = result.ops[0];
@@ -61,5 +75,10 @@ const insert = async (postId, userId, body, displayName) => {
 };
 
 export {
-  insert, findByPostId, findByPostIdAndDisplayName, findByPostIdAndUserId, generateDisplayName,
+  insert,
+  findByPostId,
+  findReplies,
+  findByPostIdAndDisplayName,
+  findByPostIdAndUserId,
+  generateDisplayName,
 };

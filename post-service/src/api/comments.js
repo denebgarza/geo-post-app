@@ -35,15 +35,39 @@ async function getDisplayName(postId, userId) {
 }
 
 // TODO: Check for distance cheating
-const insert = async (postId, userId, body) => {
-  logger.info(`Inserting comment for postId=${postId} userId=${userId}`);
+const insert = async (postId, parentCommentId, userId, body) => {
+  if (parentCommentId) {
+    logger.info(`Inserting comment for postId=${postId} userId=${userId}`);
+  } else {
+    logger.info(`Inserting comment reply for postId=${postId} parentCommentId=${parentCommentId} userId=${userId}`);
+  }
   const displayName = await getDisplayName(postId, userId);
-  const newComment = await commentsDao.insert(postId, userId, body, displayName);
+  const newComment = await commentsDao.insert(postId, parentCommentId, userId, body, displayName);
   await postsDao.incrCommentCount(postId);
   return newComment;
 };
 
 // TODO: Check for distance cheating
-const findByPostId = async (postId) => commentsDao.findByPostId(postId);
+const findByPostId = async (postId) => {
+  const allComments = await commentsDao.findByPostId(postId);
+  const replies = allComments.filter((comment) => !!comment.parent_comment_id);
+  const repliesByParentId = {};
+  replies.forEach((reply) => {
+    if (!repliesByParentId[reply.parent_comment_id]) {
+      repliesByParentId[reply.parent_comment_id] = [];
+    }
+    repliesByParentId[reply.parent_comment_id].push(reply);
+  });
+  const comments = allComments.filter((comment) => !comment.parent_comment_id);
+  comments.forEach((comment) => {
+    if (repliesByParentId[comment.id]) {
+      comment.replies = repliesByParentId[comment.id];
+    }
+  });
+  return comments;
+};
 
-export { insert, findByPostId };
+// TODO: Check for distance cheating
+const findReplies = async (parentCommentId) => commentsDao.findReplies(parentCommentId);
+
+export { insert, findByPostId, findReplies };
